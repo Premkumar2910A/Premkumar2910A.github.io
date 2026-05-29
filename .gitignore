@@ -1,9 +1,0 @@
-node_modules/
-dist/
-.playwright-mcp/
-.vite-dev*.log
-.env
-.env.*
-*.local
-*.png
-.txt
