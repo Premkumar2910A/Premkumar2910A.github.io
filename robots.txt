@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://premkumar2910a.github.io/sitemap.xml
