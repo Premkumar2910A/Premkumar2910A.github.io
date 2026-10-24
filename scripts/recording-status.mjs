@@ -1,0 +1,7 @@
+import { ANSWER_VIDEOS } from '../src/lib/answer-videos.js';
+import { writeFile } from 'node:fs/promises';
+const ready=Object.entries(ANSWER_VIDEOS).filter(([,c])=>c.src);
+const missing=Object.entries(ANSWER_VIDEOS).filter(([,c])=>!c.src);
+const text='# Recording status\n\nUpdated October 10, 2026. Zero payment: five new Veo Lite clips used 50 included daily credits. A failed project job was refunded and retried successfully. The original intro is reused.\n\nReady clips were checked with local speech recognition and sampled frames. Exact voice cloning across Flow generations is unsupported; voice consistency still needs the owner’s listening review.\n\nReady: '+ready.map(([id])=>id).join(', ')+'.\n\nStill unrecorded ('+missing.length+'): '+missing.map(([id])=>id).join(', ')+'. These require later free daily allowances. Until then, unavailable answers show a short notice pointing to the four ready topics. Reply panels and extra answer links are removed. Browser speech and simulated lip movement remain disabled.\n\nBackend is deployed on Cloudflare Workers Free. A real GitHub-origin request and local-browser request passed. Local preview origin remains enabled during development; remove it after production QA. GitHub Actions has the public endpoint variable. The updated website has not been published yet.\n';
+await writeFile('assistant-api/RECORDING-STATUS.md',text);
+console.log('Ready '+ready.length+', remaining '+missing.length);

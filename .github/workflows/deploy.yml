@@ -2,7 +2,7 @@ name: Deploy portfolio
 
 on:
   push:
-    branches: [main]
+    branches: [source]
   workflow_dispatch:
 
 permissions:
@@ -30,7 +30,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check source quality
+        run: npm run lint
+
       - name: Build
+        env:
+          VITE_PORTFOLIO_ASSISTANT_URL: ${{ vars.VITE_PORTFOLIO_ASSISTANT_URL }}
         run: npm run build
 
       - name: Upload artifact

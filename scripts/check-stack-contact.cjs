@@ -1,0 +1,11 @@
+const {chromium}=require('C:/Users/Premkumar A/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const assert=require('node:assert/strict');
+const output='C:/Users/Premkumar A/Documents/Codex/2026-10-08/hey-can-you-please-figure-out/outputs';
+(async()=>{const b=await chromium.launch({headless:true,channel:'chrome'});try{for(const width of [1440,390,360]){const p=await b.newPage({viewport:{width,height:900},reducedMotion:'reduce'});const errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto('http://127.0.0.1:4174/',{waitUntil:'networkidle'});
+const tiles=p.locator('.element');const count=await tiles.count();for(let i=0;i<count;i++){await tiles.nth(i).click();const logo=tiles.nth(i).locator('.element-logo > img');if(await logo.count()){await logo.evaluate(e=>e.decode());assert.ok(await logo.evaluate(e=>e.naturalWidth>0));}else{const icon=tiles.nth(i).locator('.element-logo .concept-logo svg');assert.equal(await icon.count(),1);const bounds=await icon.boundingBox();assert.ok(bounds.width>=24&&bounds.height>=24);}if(width<761)assert.ok(await p.locator('.mobile-skill-detail').isVisible());assert.equal(await tiles.count(),count);}
+assert.equal(await p.locator('.capability-tech').count(),0);assert.equal(await p.locator('.footer-made').count(),0);
+assert.equal(await p.getByRole('link',{name:'Resume',exact:true}).count(),2);
+await p.goto('http://127.0.0.1:4174/#project-infit',{waitUntil:'networkidle'});assert.equal(await p.locator('.project-visual figcaption').innerText(),'UX concept · In development');
+await p.locator('#contact').scrollIntoViewIfNeeded();assert.equal(await p.locator('.contact-context').count(),1);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+if(width!==360)await p.locator('#contact').screenshot({path:output+'/contact-clean-'+width+'.png',style:'.site-header, .skip-link, .reading-progress { visibility: hidden; }'});
+assert.equal(errors.length,0,errors.join('\n'));console.log(width+'px: '+count+' stack icons visible, tiles stable, clean caption, resume labels, contact and footer fit');await p.close();}}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1});

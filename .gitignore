@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.prerender/
 .playwright-mcp/
 .vite-dev*.log
 .env
@@ -7,3 +8,9 @@ dist/
 *.local
 *.png
 .txt
+.dev.vars
+.dev.vars.*
+.wrangler/
+.audit/
+# The home-screen icon is a public site asset; other PNGs stay local.
+!public/apple-touch-icon.png

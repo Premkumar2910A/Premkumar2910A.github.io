@@ -1,0 +1,7 @@
+Animate the man in the reference image. Keep his face, hair, charcoal suit, white shirt, black shoes and body proportions exactly as shown.
+Full body, centered, plain white studio background. Fixed camera: no zoom, pan or cuts. One continuous shot.
+He starts in the reference pose, standing with his hands in his trouser pockets, and returns to that exact pose before the clip ends.
+He takes one hand out for one gentle emphasis while naming the stack, then puts it back.
+He looks at the camera and says, clearly and completely: "My work spans Python and FastAPI, React and Next.js, AI workflows with LangGraph, MongoDB, authentication, and MCP integrations."
+Voice: young Indian man in his twenties, mid-pitch, warm and professional, gentle Indian-English accent, calm natural pace, clear studio microphone, same voice in every clip.
+His lips match every word. Audio is his voice only: no music, background sound, other voices, subtitles or on-screen text.

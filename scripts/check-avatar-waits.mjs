@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import { boundedWait, voiceFailureMessage, mediaUrl } from '../src/lib/avatar-speech.js';
+const controller=new AbortController();
+assert.equal(await boundedWait(Promise.resolve('ready'),controller.signal,100,'Test'),'ready');
+await assert.rejects(boundedWait(Promise.reject(new Error('Provider failed')),controller.signal,100,'Test'),/Provider failed/);
+await assert.rejects(boundedWait(new Promise(()=>{}),controller.signal,15,'Voice connection'),/Voice connection timed out/);
+const abort=new AbortController();const pending=boundedWait(new Promise(()=>{}),abort.signal,10000,'Queue');abort.abort();
+await assert.rejects(pending,error=>error.name==='AbortError');
+assert.match(voiceFailureMessage(new Error('Voice connection timed out')),/did not respond in time/);
+assert.match(voiceFailureMessage(new Error('GPU quota exceeded')),/allowance is used up/);
+assert.match(voiceFailureMessage(new Error('You have exceeded your ZeroGPU quota (60s requested vs. 0s left). Authenticate with a Hugging Face token.')),/0 seconds left; 60 needed/);
+assert.match(voiceFailureMessage(new Error('Authentication required')),/requires Hugging Face authentication/);
+assert.doesNotMatch(voiceFailureMessage(new Error('Audio duration exceeds the input limit')),/allowance is used up/);
+assert.throws(()=>mediaUrl({url:'https://untrusted.invalid/a.mp4'},'https://henrybit-musetalk-1-5.hf.space'),/Unexpected/);
+console.log('Passed: stalled connection/queue timeout, immediate cancellation, provider errors, quota handling, and media origin validation.');

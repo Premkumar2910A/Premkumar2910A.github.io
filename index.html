@@ -3,15 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Premkumar A - Full Stack Engineer building AI-powered SaaS products with FastAPI, LangGraph, MongoDB, Next.js, and Azure OpenAI."
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=20261008" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20261008" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20261008" />
+    <link
+      rel="preload"
+      href="/fonts/inter-tight.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>Premkumar A | Full Stack Engineer</title>
+    <link
+      rel="preload"
+      href="/hero/poster.webp"
+      as="image"
+      fetchpriority="high"
+    />
+    <meta name="theme-color" content="#f4f2ee" />
+    <script>
+      // A refresh always starts at the avatar. Shared links to a section still open it.
+      try {
+        history.scrollRestoration = "manual";
+        if (performance.getEntriesByType("navigation")[0]?.type === "reload" && location.hash)
+          history.replaceState(null, "", location.pathname + location.search);
+      } catch {}
+    </script>
+    <!-- SEO metadata is generated from src/lib/seo.js by Vite. -->
   </head>
   <body>
     <div id="root"></div>
+    <noscript><style>.has-motion .rv { opacity: 1; transform: none; }</style></noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
