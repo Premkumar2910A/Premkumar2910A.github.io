@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUpRight, Play, Pause, VolumeX } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Play, Pause, VolumeX, Volume2 } from "lucide-react";
 import PortfolioAssistant from "../PortfolioAssistant";
 import { ANSWER_VIDEOS } from "../../lib/answer-videos";
 import { PROFILE, HERO, UI } from "../../lib/data";
@@ -288,7 +288,7 @@ export default function Hero() {
             <button
               onPointerDown={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
-              className={`sound-control ${blocked || (playing && mutedIntro) ? "ping" : ""}`}
+              className={`sound-control ${blocked && !answerClip?.src ? "" : blocked ? "ping" : ""}`}
               onClick={toggle}
               title={playing && mutedIntro ? "Turn on sound" : playing ? "Pause video" : "Play video"}
               aria-label={
@@ -322,6 +322,14 @@ export default function Hero() {
               : "THE PERSON BEHIND THE CODE"}
           </span>
         </div>
+         {/* Outside the blended stage so its pulse never repaints the figure. */}
+         {/* Stays until the intro has been heard with sound, even after a muted play ends. */}
+         {hasVideo && !answerClip?.src && (mutedIntro || blocked) && (
+           <button className="hear-intro" onClick={toggle} onPointerDown={(e) => e.stopPropagation()}>
+             <Volume2 size={18} aria-hidden="true" />
+             <span>Tap to hear my intro</span>
+           </button>
+         )}
          <PortfolioAssistant captions={captions} onToggleCaptions={hasVideo && captionCues.length ? () => setCaptions(value => !value) : undefined}/>
         </div>
         <div className="hero-aside" hidden>

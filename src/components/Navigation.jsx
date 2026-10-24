@@ -37,7 +37,7 @@ export default function Navigation({ getScroll }) {
     const old = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     getScroll()?.stop();
-    const background = [document.querySelector('main'), document.querySelector('.site-header'), document.querySelector('.site-guide'), document.querySelector('.mini-avatar')];
+    const background = [document.querySelector('main'), document.querySelector('.site-header'), document.querySelector('.site-guide'), document.querySelector('.mini-avatar'), document.querySelector('.header-guide')];
     background.forEach(el => { if (el) el.inert = true; });
     menu.current?.querySelector("a")?.focus();
     const keys = (e) => {
@@ -91,6 +91,8 @@ export default function Navigation({ getScroll }) {
         <a className="header-contact" href={`mailto:${PROFILE.email}`}>
           Say hello <ArrowUpRight size={16} />
         </a>
+        {/* Phones: the assistant places its avatar button here instead of floating. */}
+        <div id="header-guide-slot" className="header-guide-slot"/>
         <button
           ref={toggle}
           className="mobile-toggle pill"
