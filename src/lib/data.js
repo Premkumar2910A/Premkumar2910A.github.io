@@ -259,7 +259,7 @@ export const UI = {
     "I’m based in Chennai and work remotely with the AlphaTales team in Brisbane. As a founding engineer, I work across the product—from Python services and AI workflows to the screens people use.",
     "I graduated in Computer Science Engineering in 2024 with a CGPA of 8.95/10. My earlier internships at LS Technologies and Nitroware Technologies covered backend services, AI chatbots, and workflow automation.",
   ],
-  aboutLine: "I build production AI agents and the full-stack products around them: Python APIs, LangGraph workflows, and React interfaces. Founding engineer at AlphaTales.",
+  aboutLine: "I build production AI agents and the full‑stack products around them: Python APIs, LangGraph workflows, and React interfaces. Founding engineer at AlphaTales.",
   aboutQuote:
     "My work spans backend services, AI workflows, and web interfaces.",
   currentSummary:

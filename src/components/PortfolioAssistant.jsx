@@ -4,7 +4,6 @@ import { Mic, Square, Captions, ArrowUp, ArrowUpRight, X } from 'lucide-react';
 import { boundedWait, generateAvatarSpeech, voiceFailureMessage } from '../lib/avatar-speech';
 import { MAIN_QUESTIONS, replyForTopics } from '../lib/answer-videos';
 import { prefersReducedMotion } from '../lib/browser-preferences';
-import MiniAvatar from './MiniAvatar';
 import { guideTo, localReply, navigationIntent, navigationReply, serviceReply } from '../lib/site-guide';
 
 const endpoint = import.meta.env.VITE_PORTFOLIO_ASSISTANT_URL || '';
@@ -55,11 +54,8 @@ export default function PortfolioAssistant({ captions = false, onToggleCaptions 
   const [heroVisible, setHeroVisible] = useState(true);
   const [guideOpen, setGuideOpen] = useState(false);
   const [guidedTo, setGuidedTo] = useState('');
-  // The mini avatar's speech bubble greets once, then shows only on hover.
-  const [greeted, setGreeted] = useState(false);
-  const [guideSide, setGuideSide] = useState('right');
   const [section, setSection] = useState('');
-  // Phones get a header button instead of the floating mini avatar.
+  // Touch devices and short screens reach the assistant from a header button.
   const [phone, setPhone] = useState(false);
   // Narrow phones have no guide card: the hero is the one full assistant, and
   // the header button returns the visitor to it.
@@ -71,28 +67,12 @@ export default function PortfolioAssistant({ captions = false, onToggleCaptions 
     update();query.addEventListener('change',update);small.addEventListener('change',update);
     return()=>{query.removeEventListener('change',update);small.removeEventListener('change',update);};
   },[]);
-  const [bubble, setBubble] = useState(false);
-  const [sectionPrompt, sectionQuestion] = SECTION_PROMPTS[section] || DEFAULT_PROMPT;
+  const [, sectionQuestion] = SECTION_PROMPTS[section] || DEFAULT_PROMPT;
   useEffect(()=>{
     const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)setSection(entry.target.id);}),{rootMargin:'-45% 0px -50% 0px'});
     document.querySelectorAll('main section[id]').forEach(el=>observer.observe(el));
     return()=>observer.disconnect();
   },[]);
-  useEffect(()=>{
-    // Each new section briefly shows its prompt; hovering shows it again.
-    if(heroVisible||guideOpen||!section)return;
-    setBubble(true);
-    const timer=setTimeout(()=>setBubble(false),4000);
-    return()=>clearTimeout(timer);
-  },[section,heroVisible,guideOpen]);
-  // The mini avatar nods when a new answer arrives in the guide.
-  const [nodding, setNodding] = useState(false);
-  useEffect(()=>{
-    if(!reply)return;
-    setNodding(true);
-    const timer=setTimeout(()=>setNodding(false),1400);
-    return()=>clearTimeout(timer);
-  },[reply]);
   const replyBox = useRef(null), root = useRef(null), recognition = useRef(null), request = useRef(null), videoRequest = useRef(null);
   const turn = useRef(0), history = useRef([]), topic = useRef(''), askRef = useRef(null);
   const busy = useRef(false);
@@ -232,11 +212,6 @@ export default function PortfolioAssistant({ captions = false, onToggleCaptions 
     return()=>cancelAnimationFrame(frame);
   },[reply]);
   useEffect(()=>{
-    if(heroVisible||greeted)return;
-    const timer=setTimeout(()=>setGreeted(true),4500);
-    return()=>clearTimeout(timer);
-  },[heroVisible,greeted]);
-  useEffect(()=>{
     if(guideOpen&&!reply)document.getElementById('guide-question')?.focus();
     // Only on opening; later replies keep focus where the visitor left it.
   },[guideOpen]);
@@ -282,11 +257,7 @@ export default function PortfolioAssistant({ captions = false, onToggleCaptions 
     {notice && <p role="status" className="character-status">{notice}</p>}
     {ready && !supported && <p className="character-status">Voice input isn’t supported in this browser. Type a question or use a topic.</p>}
     <details className="character-privacy"><summary>Privacy</summary><p className="character-voice-note">The microphone starts only when you tap. Your browser may process voice online.{endpoint?' Typed and spoken questions, with recent replies, go to the portfolio’s answer service on Cloudflare Workers AI, with OpenRouter as a backup. Questions are logged without personal details to improve the answers.':''}{liveVideo?' Reply text and the avatar sample go to Hugging Face for voice and lip sync.':''} Topic buttons play existing recordings.</p></details>
-    {!heroVisible && phone && document.getElementById('header-guide-slot') && createPortal(<button className={`header-guide${guideOpen&&!narrow?' is-open':''}${pending?' is-thinking':''}`} onClick={()=>narrow?guideTo({id:'hero'}):setGuideOpen(open=>!open)} aria-expanded={narrow?undefined:guideOpen} aria-label={narrow?'Back to Premkumar’s avatar to ask a question':guideOpen?'Close Premkumar’s guide':'Ask Premkumar a question'}>
-      <span className="header-guide-face" aria-hidden="true"><img src="/hero/mini-avatar.webp" alt="" width="375" height="960"/></span><span>Ask</span>
-    </button>, document.getElementById('header-guide-slot'))}
-    {!heroVisible && !phone && createPortal(<MiniAvatar greeting={!greeted||bubble} prompt={sectionPrompt} open={guideOpen} mood={pending?'thinking':nodding?'nodding':''} onToggle={()=>setGuideOpen(open=>!open)} onSide={setGuideSide}/>, document.body)}
-    {guideOpen && !heroVisible && !narrow && createPortal(<aside className={`site-guide${phone?' is-sheet':' has-avatar'}${!phone&&guideSide==='left'?' is-left':''}`} aria-label="Premkumar’s site guide">
+    {guideOpen && !heroVisible && !narrow && createPortal(<aside className={`site-guide${phone?' is-sheet':''}`} aria-label="Premkumar’s site guide">
       <div className="site-guide-head">
         <span className="site-guide-live" aria-hidden="true"/>
         <span><strong>Premkumar</strong><span className="mono">SITE GUIDE</span></span>
