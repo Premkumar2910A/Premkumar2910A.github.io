@@ -244,6 +244,8 @@ export const HIGHLIGHTS = [
 ];
 export const HERO = {
   image: "/hero/poster.webp",
+  // Transparent cut-out of the poster: shown without blend modes, which some GPUs drop.
+  still: "/hero/still.webp",
   video: "/hero/hero.mp4",
   webm: "/hero/hero.webm",
 };

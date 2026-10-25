@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUpRight, Play, Pause, VolumeX, Volume2 } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Play, Pause } from "lucide-react";
 import PortfolioAssistant from "../PortfolioAssistant";
 import { ANSWER_VIDEOS } from "../../lib/answer-videos";
 import { PROFILE, HERO, UI } from "../../lib/data";
@@ -9,12 +9,7 @@ import { RECORDED_CAPTIONS } from "../../lib/recorded-captions";
 export default function Hero() {
   const [answerTopic, setAnswerTopic] = useState(null);
   const [captions, setCaptions] = useState(false);
-  // The intro plays with sound when the browser allows it. Otherwise it plays muted
-  // with captions, and the visitor's first click or key press turns the sound on.
-  const [mutedIntro, setMutedIntro] = useState(false);
-  const soundOn = useRef(false);
-  const audioBlocked = useRef(false);
-  const showCaptions = captions || mutedIntro;
+  const showCaptions = captions;
   const [answerFrame, setAnswerFrame] = useState(null);
   const answerClip = answerTopic?.src ? {src:answerTopic.src} : ANSWER_VIDEOS[answerTopic?.topic];
   const answerQueue = useRef([]);
@@ -93,21 +88,11 @@ export default function Hero() {
         return;
       try {
         starting = true;
-        // Once the browser refuses sound, later attempts go straight to muted.
-        let silent = audioBlocked.current && !answerActive.current && !soundOn.current;
-        v.muted = silent;
-        try {
-          await v.play();
-        } catch (error) {
-          // Audible autoplay was blocked; only the automatic intro falls back to muted.
-          if (error.name !== 'NotAllowedError' || answerActive.current || soundOn.current) throw error;
-          audioBlocked.current = true;
-          silent = true;
-          v.muted = true;
-          await v.play();
-        }
+        // The intro only ever plays with sound. If the browser holds sound back
+        // until the visitor interacts, it waits; the first click or key press starts it.
+        v.muted = false;
+        await v.play();
         if (disposed) return;
-        setMutedIntro(silent);
         if (userPaused.current || !visible.current || document.hidden) v.pause();
         setBlocked(false);
       } catch (error) {
@@ -118,14 +103,6 @@ export default function Hero() {
     };
     const unlock = (e) => {
       if (e.target.closest?.('.character-assistant')) return;
-      // The first interaction unlocks sound: restart a muted intro audibly.
-      if (!v.paused && v.muted && !answerActive.current) {
-        soundOn.current = true;
-        v.currentTime = 0;
-        v.muted = false;
-        setMutedIntro(false);
-        return;
-      }
       play();
     };
     const assistantStart = () => { userPaused.current = true; v.pause(); setPlaying(false); setAnswerFrame(null); };
@@ -149,6 +126,8 @@ export default function Hero() {
     play();
     document.addEventListener("visibilitychange", changed);
     addEventListener("pointerdown", unlock);
+    // On touch screens only a completed tap grants sound permission, so listen for it too.
+    addEventListener("click", unlock);
     addEventListener("keydown", unlock);
     return () => {
       disposed = true;
@@ -156,20 +135,13 @@ export default function Hero() {
       v.pause();
       document.removeEventListener("visibilitychange", changed);
       removeEventListener("pointerdown", unlock);
+      removeEventListener("click", unlock);
       removeEventListener("keydown", unlock);
       removeEventListener('portfolio-question-start', assistantStart);
     };
   }, [hasVideo, answerTopic]);
   const toggle = async () => {
     const v = video.current;
-    soundOn.current = true;
-    if (!v.paused && v.muted) {
-      // Restart so the visitor hears the introduction from the beginning.
-      v.currentTime = 0;
-      v.muted = false;
-      setMutedIntro(false);
-      return;
-    }
     if (!v.paused) {
       userPaused.current = true;
       v.pause();
@@ -179,7 +151,6 @@ export default function Hero() {
     if (v.ended || finished.current) v.currentTime = 0;
     finished.current = false;
     v.muted = false;
-    setMutedIntro(false);
     try {
       await v.play();
       setBlocked(false);
@@ -225,7 +196,7 @@ export default function Hero() {
           {hasVideo && (
             <img
               className="character-still"
-              src={HERO.image}
+              src={HERO.still}
               alt=""
               aria-hidden="true"
               width="768"
@@ -288,17 +259,15 @@ export default function Hero() {
             <button
               onPointerDown={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
-              className={`sound-control ${blocked && !answerClip?.src ? "" : blocked ? "ping" : ""}`}
+              className={`sound-control ${blocked ? "ping" : ""}`}
               onClick={toggle}
-              title={playing && mutedIntro ? "Turn on sound" : playing ? "Pause video" : "Play video"}
+              title={playing ? "Pause video" : "Play video"}
               aria-label={
-                playing && mutedIntro ? "Turn on sound and restart the introduction" : playing ? "Pause video" : answerTopic?.src ? "Play answer with sound" : answerClip?.src ? "Play recorded answer with sound" : "Play introduction with sound"
+                playing ? "Pause video" : answerTopic?.src ? "Play answer with sound" : answerClip?.src ? "Play recorded answer with sound" : "Play introduction with sound"
               }
-              aria-pressed={playing && !mutedIntro}
+              aria-pressed={playing}
             >
-              {playing && mutedIntro ? (
-                <VolumeX size={18} />
-              ) : playing ? (
+              {playing ? (
                 <Pause size={18} fill="currentColor" />
               ) : (
                 <Play size={18} fill="currentColor" />
@@ -315,21 +284,13 @@ export default function Hero() {
               ? playing ? (answerTopic?.src ? "ANSWER" : "RECORDED ANSWER") : blocked ? "PLAY ANSWER · TAP FOR SOUND" : "REPLAY ANSWER"
               : hasVideo
               ? playing
-                ? mutedIntro ? "MUTED INTRO · TAP FOR SOUND" : "A SHORT INTRODUCTION"
+                ? "A SHORT INTRODUCTION"
                 : blocked
                   ? "PLAY INTRO · SOUND REQUIRES A TAP"
                   : "MEET PREMKUMAR · PLAY INTRO"
               : "THE PERSON BEHIND THE CODE"}
           </span>
         </div>
-         {/* Outside the blended stage so its pulse never repaints the figure. */}
-         {/* Stays until the intro has been heard with sound, even after a muted play ends. */}
-         {hasVideo && !answerClip?.src && (mutedIntro || blocked) && (
-           <button className="hear-intro" onClick={toggle} onPointerDown={(e) => e.stopPropagation()}>
-             <Volume2 size={18} aria-hidden="true" />
-             <span>Tap to hear my intro</span>
-           </button>
-         )}
          <PortfolioAssistant captions={captions} onToggleCaptions={hasVideo && captionCues.length ? () => setCaptions(value => !value) : undefined}/>
         </div>
         <div className="hero-aside" hidden>
